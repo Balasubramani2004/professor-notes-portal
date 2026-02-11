@@ -7,46 +7,38 @@ function Upload() {
   const [msg, setMsg] = useState("");
 
   const handleUpload = async () => {
-    if (!file) {
-      setMsg("Please select a file ❗");
-      return;
-    }
-const formData = new FormData();
-formData.append("file", file);
-formData.append("upload_preset", "website");
-formData.append("resource_type", "raw"); // important for PDFs
+  if (!file) return;
 
-    try {
-      // ✅ correct endpoint for PDF/docs
-      const res = await fetch(
-        "https://api.cloudinary.com/v1_1/dmisidhsr/raw/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "website");   // your preset name
 
-      const result = await res.json();
-      console.log("Cloudinary result:", result);
-
-      if (!result.secure_url) {
-        throw new Error("Cloudinary upload failed");
+  try {
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dmisidhsr/raw/upload",  // <-- IMPORTANT raw
+      {
+        method: "POST",
+        body: formData,
       }
+    );
 
-      // ✅ save to Firestore
-      await addDoc(collection(db, "notes"), {
-        name: file.name,
-        url: result.secure_url,
-        createdAt: new Date(),
-      });
+    const data = await res.json();
 
-      setMsg("Upload successful ✅");
-      setFile(null);
-    } catch (err) {
-      console.error("Upload error:", err);
-      setMsg("Upload failed ❌ Check console");
-    }
-  };
+    // Save to Firestore
+    await addDoc(collection(db, "notes"), {
+      name: file.name,
+      url: data.secure_url,
+      createdAt: new Date(),
+    });
+
+    alert("Upload successful ✅");
+    setFile(null);
+  } catch (err) {
+    console.error(err);
+    alert("Upload failed ❌");
+  }
+};
+
 
   return (
     <div style={{ textAlign: "center", marginTop: "60px" }}>
