@@ -1,59 +1,59 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
-function Notes() {
-  const [notes, setNotes] = useState([]);
-  const [selectedPDF, setSelectedPDF] = useState(null);
 
-  useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(q);
+const Notes = () => {
+const [notes, setNotes] = useState([]);
+const [selectedNote, setSelectedNote] = useState(null);
 
-        const list = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
 
-        console.log("Fetched notes:", list); // ⭐ debug
-        setNotes(list);
-      } catch (err) {
-        console.error("Firestore fetch error:", err);
-      }
-    };
+useEffect(() => {
+const fetchNotes = async () => {
+const querySnapshot = await getDocs(collection(db, "notes"));
+const notesData = querySnapshot.docs.map((doc) => ({
+id: doc.id,
+...doc.data(),
+}));
 
-    fetchNotes();
-  }, []);
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Available Notes</h2>
+setNotes(notesData);
+};
 
-      {notes.length === 0 && <p>No notes uploaded yet.</p>}
 
-      {notes.map(note => (
-        <div key={note.id} style={{ marginBottom: "10px" }}>
-          <button onClick={() => setSelectedPDF(note.url)}>
-            {note.name}
-          </button>
-        </div>
-      ))}
+fetchNotes();
+}, []);
 
-      {selectedPDF && (
-        <div style={{ marginTop: "20px" }}>
-          <h3>Reading Online</h3>
-          <iframe
-            src={selectedPDF}
-            width="100%"
-            height="600px"
-            title="PDF Viewer"
-          />
-        </div>
-      )}
-    </div>
-  );
-}
+
+return (
+<div style={{ padding: 20 }}>
+<h2>Available Notes</h2>
+
+
+{notes.map((note) => (
+<div key={note.id} style={{ marginBottom: 10 }}>
+<button onClick={() => setSelectedNote(note.url)}>
+{note.name}
+</button>
+</div>
+))}
+
+
+<h3 style={{ marginTop: 30 }}>Reading Online</h3>
+
+
+{selectedNote && (
+<iframe
+src={selectedNote}
+width="100%"
+height="600px"
+title="PDF Viewer"
+style={{ border: "1px solid #ccc" }}
+/>
+)}
+</div>
+);
+};
+
 
 export default Notes;

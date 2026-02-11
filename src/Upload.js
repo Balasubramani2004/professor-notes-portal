@@ -11,10 +11,10 @@ function Upload() {
       setMsg("Please select a file ❗");
       return;
     }
-
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", "website");
+const formData = new FormData();
+formData.append("file", file);
+formData.append("upload_preset", "website");
+formData.append("resource_type", "raw"); // important for PDFs
 
     try {
       // ✅ correct endpoint for PDF/docs
@@ -22,7 +22,7 @@ function Upload() {
         "https://api.cloudinary.com/v1_1/dmisidhsr/raw/upload",
         {
           method: "POST",
-          body: data,
+          body: formData,
         }
       );
 
